@@ -28,6 +28,9 @@ Thumbs.db
 .claude/settings.local.json
 .claude/launch.json
 
+# 文档（不属于代码仓库）
+*.docx
+
 # 运行产物
 cases/
 *.log
