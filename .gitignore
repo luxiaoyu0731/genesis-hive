@@ -1,0 +1,33 @@
+# 环境变量（含 API Key，绝对不能提交）
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# Node
+node_modules/
+frontend/node_modules/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude Code 本地配置
+.claude/settings.local.json
+.claude/launch.json
+
+# 运行产物
+cases/
+*.log

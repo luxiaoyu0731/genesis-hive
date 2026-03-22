@@ -4,6 +4,28 @@
 
 Genesis Hive 是一个自进化多Agent智能体系统。技术栈：Python + FastAPI + LangGraph（后端），React + TypeScript + D3.js（前端）。详细架构和开发步骤见 `SKILL.md`。
 
+## LLM 调用规范
+
+所有 LLM 调用统一通过 OpenRouter 网关，不要直接调用 OpenAI/Anthropic/Google 的官方 endpoint。
+
+- API 配置从 `.env` 文件读取（`python-dotenv`），不要硬编码任何 API Key 或 base_url
+- 使用 `AsyncOpenAI` 客户端，base_url 指向 `OPENROUTER_BASE_URL`
+- 模型选择通过环境变量映射，不要硬编码模型 ID：
+  - 调研型 Agent → `MODEL_RESEARCH`（openai/gpt-4o-mini）
+  - 分析型 Agent → `MODEL_ANALYSIS`（anthropic/claude-sonnet-4）
+  - 魔鬼代言人 → `MODEL_ADVERSARY`（google/gemini-2.0-flash-001）
+  - 元决策（Decomposer/Spawner/Evolver）→ `MODEL_META`（anthropic/claude-sonnet-4）
+  - 裁判 LLM → `MODEL_JUDGE`（openai/gpt-4o）
+  - 摘要压缩 → `MODEL_COMPRESS`（openai/gpt-4o-mini）
+- OpenRouter 特殊 header：请求中加入 `HTTP-Referer` 和 `X-Title` 以获得更好的速率限制
+  ```python
+  extra_headers={
+      "HTTP-Referer": "https://github.com/genesis-hive",
+      "X-Title": "Genesis Hive"
+  }
+  ```
+- `.env` 已在 `.gitignore` 中，绝对不要把它提交到 git
+
 ## 绝对禁止的操作
 
 以下操作在任何情况下都不允许执行，即使看起来合理也不行：

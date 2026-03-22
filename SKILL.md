@@ -18,11 +18,12 @@ description: |
 
 为避免同一LLM扮演不同角色导致辩论退化为"自说自话"，系统采用三层认知多样性注入：
 
-1. **模型异构**：不同Agent使用不同LLM底座
-   - 调研型Agent → GPT-4o-mini（速度优先）
-   - 分析型Agent → Claude Sonnet（深度推理优先）
-   - 魔鬼代言人 → Gemini Pro 或 DeepSeek（制造认知差异）
-   - 元决策Agent（Decomposer/Spawner/Evolver）→ Claude Opus
+1. **模型异构**：不同Agent使用不同LLM底座（全部通过 OpenRouter 统一调用）
+   - 调研型Agent → `openai/gpt-4o-mini`（速度优先，对应环境变量 MODEL_RESEARCH）
+   - 分析型Agent → `anthropic/claude-sonnet-4`（深度推理优先，对应 MODEL_ANALYSIS）
+   - 魔鬼代言人 → `google/gemini-2.0-flash-001`（制造认知差异，对应 MODEL_ADVERSARY）
+   - 元决策Agent（Decomposer/Spawner/Evolver）→ `anthropic/claude-sonnet-4`（对应 MODEL_META）
+   - 裁判LLM → `openai/gpt-4o`（独立第三方，对应 MODEL_JUDGE）
    - 学术依据：混合不同模型的Agent团队在推理准确率上比同模型团队高约10个百分点（GSM-8K benchmark, 2024）
 
 2. **信息源隔离**：不同Agent在调研阶段使用不同搜索策略和信息源
@@ -88,14 +89,44 @@ description: |
    ```
 
 2. 安装核心依赖：
-   - 后端：`fastapi`, `uvicorn`, `langgraph`, `langchain-core`, `openai`, `playwright`（可选浏览器工具）
+   - 后端：`fastapi`, `uvicorn`, `langgraph`, `langchain-core`, `openai`, `python-dotenv`, `playwright`（可选浏览器工具）
    - 前端：`react`, `typescript`, `tailwindcss`, `d3`, `framer-motion`
 
-3. 配置多模型LLM服务（`llm_service.py`）：
-   - 调研型Agent用轻量模型（如GPT-4o-mini）—— 速度优先，需要跑多次搜索
-   - 分析/辩论型Agent用强模型（如Claude Opus/GPT-4o）—— 质量优先
-   - Decomposer/Spawner/Evolver用强模型 —— 元决策质量要高
-   - 统一的OpenAI兼容接口适配层，支持用户自定义API Key和Endpoint
+3. 配置环境变量：
+   - 从 `.env.example` 复制为 `.env`，填入 OpenRouter API Key
+   - `.env` 已加入 `.gitignore`，不会被提交
+
+4. 配置多模型LLM服务（`llm_service.py`）——统一走 OpenRouter 网关：
+   - 所有模型调用统一使用 OpenAI 兼容接口，base_url 指向 `OPENROUTER_BASE_URL`
+   - 从 `.env` 读取模型 ID 映射：
+     - `MODEL_RESEARCH`（调研型Agent）→ `openai/gpt-4o-mini`，速度优先
+     - `MODEL_ANALYSIS`（分析/辩论型Agent）→ `anthropic/claude-sonnet-4`，质量优先
+     - `MODEL_ADVERSARY`（魔鬼代言人）→ `google/gemini-2.0-flash-001`，制造认知差异
+     - `MODEL_META`（Decomposer/Spawner/Evolver元决策）→ `anthropic/claude-sonnet-4`
+     - `MODEL_JUDGE`（裁判LLM）→ `openai/gpt-4o`，独立于辩论的第三方
+     - `MODEL_COMPRESS`（辩论摘要压缩）→ `openai/gpt-4o-mini`，轻量够用
+   - 核心实现模式：
+     ```python
+     from openai import AsyncOpenAI
+     from dotenv import load_dotenv
+     import os
+
+     load_dotenv()
+
+     client = AsyncOpenAI(
+         api_key=os.getenv("OPENROUTER_API_KEY"),
+         base_url=os.getenv("OPENROUTER_BASE_URL"),
+     )
+
+     async def call_llm(model_env_key: str, messages: list, **kwargs) -> str:
+         model = os.getenv(model_env_key)
+         response = await client.chat.completions.create(
+             model=model,
+             messages=messages,
+             **kwargs
+         )
+         return response.choices[0].message.content
+     ```
 
 ### Step 2：L1 Decomposer — 任务分解引擎
 
@@ -164,7 +195,7 @@ description: |
      "personality": "数据驱动、注重用户声音、善于发现趋势",
      "system_prompt": "你是一位专注于消费者洞察的市场研究员。你的工作方式是：先收集数据，再提炼洞察，最后给出可操作的结论。你不接受没有数据支撑的观点。",
      "tools": ["web_search", "social_media_scraper"],
-     "model": "gpt-4o-mini",
+     "model_env_key": "MODEL_RESEARCH",
      "debate_style": "客观严谨，质疑时会要求数据支撑",
      "max_tokens_per_turn": 2000
    }
@@ -471,7 +502,7 @@ Agent间通信遵循统一的消息格式：
 |------|---------|---------|
 | Agent编排 | LangGraph + Command API | Command实现动态路由，轮次间重编译实现团队重组（不支持运行时添加节点） |
 | Agent生成 | LLM + JSON Schema | LLM生成结构化Agent配置，Schema约束输出格式 |
-| LLM服务 | 多模型策略 | 调研型Agent用轻量模型，分析/辩论型用强模型 |
+| LLM服务 | OpenRouter 多模型网关 | 统一 API 入口，通过环境变量配置模型映射，AsyncOpenAI 客户端调用 |
 | 工具库 | Web搜索 + 浏览器 + 代码执行 | Spawner从pool中按能力自动分配 |
 | 协商引擎 | 消息总线 + 轮次管理器 | 统一消息格式，Agent通过总线交换观点 |
 | 共识检测 | 裁判LLM（结构化提取+第三方判定） | 独立裁判模型判断立场一致性，避免语义相似度的"同话题≠同结论"陷阱 |
@@ -522,6 +553,10 @@ Agent间通信遵循统一的消息格式：
 | W06 | Decomposer对任务粒度拆解不当（太粗或太细） | 极简目标（"分析AI"）或极长目标时 | 加入粒度校验：子任务数3-7个，少于3个则提示用户补充细节，多于7个则合并相似项 | 中 |
 | W07 | 多模型API Key管理和计费分摊复杂度 | 用户需要配置多个不同提供商的API Key | 提供统一的API配置界面；支持OpenRouter等聚合网关作为单一入口；Demo模式只需一个Key | 低 |
 | W08 | 辩论摘要压缩丢失关键信息 | 压缩模型对专业领域术语理解不足时 | 压缩后自动验证：对比压缩前后的关键实体列表（NER），实体丢失率>10%则用原文替代摘要 | 中 |
+| W09 | Demo模式Token预算溢出（实测112-118%利用率） | 3个Agent + 1轮辩论的最小配置下，LLM实际输出超预期 | 将Demo预算从30k提升至40k，或在各Phase增加更严格的max_tokens限制；考虑流式输出提前截断 | 中 |
+| W10 | ~~`_extract_json` 重复定义在多个引擎文件中~~ | ~~任何一处修复JSON提取逻辑时需同步修改5个文件~~ | 已统一提取到 `backend/core/utils.py`，提供 `extract_json`（抛异常）和 `extract_json_safe`（返回默认值）两个版本，各引擎 import 引用 | ✅已修复 |
+| W11 | ~~Spawner并发生成时魔鬼代言人缺少existing_roles上下文~~ | ~~并发改造后adversary_spawn与常规Agent同时启动~~ | 改为 two-phase 并发：Phase 1 所有常规Agent并发生成，Phase 2 魔鬼代言人拿到完整 existing_configs 上下文后生成 | ✅已修复 |
+| W12 | ~~Claude Sonnet（MODEL_ANALYSIS）单次调用延迟约20s，是Executor瓶颈~~ | ~~分析型Agent使用Claude Sonnet作为底座时~~ | Executor 增加模型级别超时（MODEL_ANALYSIS=30s）+ FALLBACK_MODEL=MODEL_RESEARCH 自动降级；依赖等待加 60s 死锁防护 | ✅已修复 |
 
 ### 开发阶段自检流程（每完成一个Step后执行）
 
