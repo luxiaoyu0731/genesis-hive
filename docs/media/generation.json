@@ -1,0 +1,8 @@
+{
+  "date": "2026-10-06",
+  "tool": "OpenAI built-in image_gen",
+  "prompt": "Use case: stylized-concept. Asset: GitHub README hero for Genesis Hive, an experimental heterogeneous multi-agent deliberation engine. Wide editorial 3D illustration: five distinct luminous translucent geometric agents around a circular discussion table, fine connecting threads and branching modular hexagonal structures in distance. Midnight navy, lavender and warm coral, sophisticated cinematic lighting, crisp composition, no people, no text, no logos, no fake interfaces, no metric claims.",
+  "asset": "project-hero.png",
+  "sha256": "a00f74540fae3b308e53a7d57aee920f0665a92e57f18b2b08f6568c0fe0f569",
+  "review": "Concept illustration inspected; no fabricated UI or metrics; not a system screenshot."
+}

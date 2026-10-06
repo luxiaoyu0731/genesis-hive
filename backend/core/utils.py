@@ -22,7 +22,10 @@ def extract_json(text: str) -> dict:
 
     # 策略 1：直接解析
     try:
-        return json.loads(text)
+        result = json.loads(text)
+        if isinstance(result, dict):
+            return result
+        raise ValueError("LLM JSON 必须是对象")
     except json.JSONDecodeError:
         pass
 
@@ -30,7 +33,10 @@ def extract_json(text: str) -> dict:
     match = re.search(r"```(?:json)?\s*\n?(.*?)\n?\s*```", text, re.DOTALL)
     if match:
         try:
-            return json.loads(match.group(1).strip())
+            result = json.loads(match.group(1).strip())
+            if isinstance(result, dict):
+                return result
+            raise ValueError("LLM JSON 必须是对象")
         except json.JSONDecodeError:
             pass
 
