@@ -34,3 +34,16 @@ Thumbs.db
 # 运行产物
 cases/
 *.log
+
+# Local credentials, caches and temporary artifacts
+.env.*
+!.env*.example
+*.pem
+*.key
+*.p12
+*.pfx
+.pytest_cache/
+*.tmp
+*.bak
+.cache/
+!.env*.example
