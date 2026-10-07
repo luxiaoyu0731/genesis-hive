@@ -56,3 +56,5 @@ Tool adapters include placeholders; HTTP spending is not enforced as a hard prov
 [Apache-2.0](LICENSE)
 
 [Report a bug](https://github.com/luxiaoyu0731/genesis-hive/issues/new?template=bug_report.yml) · [First-use feedback](https://github.com/luxiaoyu0731/genesis-hive/issues/new?template=first_use.yml) · [Starter tasks](CONTRIBUTING.md)
+
+[Versioned releases and artifact verification](docs/releasing.md)

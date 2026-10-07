@@ -10,7 +10,6 @@ import json
 import time
 from typing import Callable, Awaitable
 
-from backend.core.llm_service import call_llm
 from backend.core.state import HiveState
 
 
@@ -32,14 +31,8 @@ FALLBACK_MODEL = "MODEL_RESEARCH"  # GPT-4o-mini 作为兜底
 
 def _hash_config(config: dict) -> str:
     """对 Agent 配置取 hash，用于增量执行判断"""
-    # 只取影响执行结果的关键字段
-    key_fields = {
-        "agent_id": config.get("agent_id"),
-        "system_prompt": config.get("system_prompt"),
-        "model_env_key": config.get("model_env_key"),
-        "tools": config.get("tools"),
-        "capability": config.get("capability"),
-    }
+    # Hash all execution inputs; new strategy/tool fields must invalidate reuse too.
+    key_fields = config
     raw = json.dumps(key_fields, sort_keys=True, ensure_ascii=False)
     return hashlib.sha256(raw.encode()).hexdigest()[:16]
 
@@ -113,19 +106,45 @@ async def executor_engine(
     agents_to_run: list[dict] = []
     reused_results: dict[str, dict] = {}
 
-    for config in agent_configs:
-        agent_id = config["agent_id"]
-        h = _hash_config(config)
-        new_hashes[agent_id] = h
-
-        if agent_id in prev_hashes and prev_hashes[agent_id] == h and agent_id in prev_results:
-            # 配置未变更，复用上轮结果
-            reused_results[agent_id] = prev_results[agent_id]
-        else:
-            agents_to_run.append(config)
-
-    # 构建依赖关系
     dep_map = _build_dependency_map(agent_configs, task_graph)
+    ids = [c["agent_id"] for c in agent_configs]
+    if len(set(ids)) != len(ids):
+        raise ValueError("Agent IDs must be unique")
+    assigned = {c.get("subtask_id") for c in agent_configs}
+    if any(d not in assigned for t in task_graph.get("subtasks", []) for d in t.get("dependencies", [])):
+        raise ValueError("Task dependency has no assigned agent")
+    visiting = set()
+    by_id = {c["agent_id"]: c for c in agent_configs}
+
+    def fingerprint(aid):
+        if aid in new_hashes:
+            return new_hashes[aid]
+        if aid in visiting:
+            raise ValueError("Cyclic task dependencies")
+        visiting.add(aid)
+        value = {"config": by_id[aid], "goal": goal, "budget": per_agent_budget,
+                 "task_graph": task_graph,
+                 "upstream": {d: fingerprint(d) for d in dep_map[aid]}}
+        new_hashes[aid] = _hash_config(value)
+        visiting.remove(aid)
+        return new_hashes[aid]
+
+    for aid in ids:
+        fingerprint(aid)
+    dirty = {aid for aid in ids if prev_hashes.get(aid) != new_hashes[aid]
+             or aid not in prev_results or any(prev_results.get(aid, {}).get(k) for k in ("_error", "_timeout"))}
+    # A recovered upstream must refresh all dependents, even when its config is unchanged.
+    while True:
+        expanded = dirty | {aid for aid in ids if any(d in dirty for d in dep_map[aid])}
+        if expanded == dirty:
+            break
+        dirty = expanded
+    for config in agent_configs:
+        aid = config["agent_id"]
+        if aid in dirty:
+            agents_to_run.append(config)
+        else:
+            reused_results[aid] = prev_results[aid]
 
     # 用 asyncio Event 实现依赖等待
     completion_events: dict[str, asyncio.Event] = {}
@@ -189,6 +208,10 @@ async def executor_engine(
                     "_timeout": True,
                 }
 
+        except Exception as exc:
+            result = {"agent_id": agent_id, "preliminary_result": "Agent execution failed; retry required.",
+                      "confidence": 0.0, "tokens_used": 0, "_error": type(exc).__name__}
+
         results[agent_id] = result
         total_tokens_used += result.get("tokens_used", 0)
 
@@ -243,6 +266,8 @@ async def _default_agent_runner(
     effective_max = min(2000, token_budget)
     if config.get("_demo_mode"):
         effective_max = min(1200, token_budget)
+
+    from backend.core.llm_service import call_llm
 
     result = await call_llm(
         model_env_key=model_key,

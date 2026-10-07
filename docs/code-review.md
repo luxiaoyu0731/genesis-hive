@@ -38,3 +38,7 @@ JSON 契约离线 unittest：2 tests，OK；全部 Python 文件语法检查通�
 `test_executor_mock.py` 在使用无效示例接口地址和占位密钥的隔离环境下执行，验证并发、依赖先后和增量复用通过；未调用收费模型，模拟耗时不能写成真实模型效率指标。JSON 输出回归测试通过。
 
 上述依赖告警已解决，公网服务发布仍受未修复的认证与任务生命周期问题阻挡，不宣称整系统安全验收完成。
+
+### Executor recovery regression (2026-10-07)
+
+The previous cache keyed only selected agent fields, allowing reuse across changed goals/strategies and upstream inputs. It also propagated ordinary runner exceptions through the entire gather. Reuse now fingerprints execution inputs and dependencies, invalidates failed results plus downstream tasks, and catches ordinary task errors without leaking exception content. Cycles/unassigned dependencies fail before calling any runner. Offline tests exercise unchanged reuse, changed goal/strategy, failure/retry and invalid graphs; these checks do not assess model accuracy. Existing cached hashes naturally miss once after upgrade. Revert the executor commit to roll back; no persisted state migration.
