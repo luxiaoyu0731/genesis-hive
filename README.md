@@ -1,10 +1,16 @@
 # Genesis Hive
 
+[English](README.en.md)
+
 从一个目标生成 Agent 团队，通过并行分析、圆桌质证与团队调整汇总结果。
 
 ![多角色协作概念插画](docs/media/project-hero.png)
 
 Python · FastAPI · LangGraph · React · Apache-2.0
+
+![Recorded walkthrough](docs/media/walkthrough.gif)
+
+演示说明：实际网页录屏；五个阶段均为静态示例，不是实时模型运行。
 
 ## 如何工作
 
@@ -22,7 +28,18 @@ flowchart LR
 
 角色使用不同模型与分析框架；裁判判断共识，轮次摘要控制上下文，团队变化后复用未变化角色的结果。
 
-## 本地运行
+## 免密钥体验
+
+```sh
+git clone https://github.com/luxiaoyu0731/genesis-hive.git
+cd genesis-hive/frontend
+npm ci
+npm run dev
+```
+
+网页展示固定示例，可切换五个阶段；不调用模型、不产生费用。当前网页尚未接入后端目标提交。
+
+## 后端引擎运行
 
 建议使用 Python 3.11+；前端需要 Node.js 22.12+，与 `frontend/package.json` 的要求一致。
 
@@ -46,7 +63,7 @@ npm ci
 npm run dev
 ```
 
-打开终端给出的 URL，输入目标开始运行。模型调用会产生供应商费用，输入内容可能发送给相应模型服务。[操作指南](docs/usage.md)。
+按操作指南调用 REST API 发起运行。模型调用会产生供应商费用，输入内容可能发送给相应模型服务。[操作指南](docs/usage.md)。
 
 <details>
 <summary>开发与使用边界</summary>

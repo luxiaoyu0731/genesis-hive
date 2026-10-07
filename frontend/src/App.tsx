@@ -36,7 +36,7 @@ export default function App() {
             <span className="text-[var(--color-text-dim)]"> Hive</span>
           </div>
           <span className="text-[10px] text-[var(--color-text-dim)] px-2 py-0.5 rounded" style={{ background: "var(--color-surface-2)" }}>
-            自进化多Agent智能体
+            静态示例 · 不调用模型
           </span>
         </div>
         <div className="text-[11px] text-[var(--color-text-dim)]">
