@@ -6,6 +6,11 @@
 3. 增量执行：未变更的 Agent 复用上轮结果
 """
 
+
+from pathlib import Path
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
 import asyncio
 import time
 

@@ -44,17 +44,17 @@ Task graph → specialist roles → dependency-aware execution → council discu
 
 ```sh
 python3 -B -m unittest discover -s tests -v
-.venv/bin/python test_executor_mock.py
+.venv/bin/python scripts/experiments/test_executor_mock.py
 ```
 
 Tool adapters include placeholders; HTTP spending is not enforced as a hard provider budget. Role diversity does not establish improved accuracy.
 
-[Code review](docs/code-review.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [Asset credits](docs/media/README.md)
+[Code review](docs/code-review.md) · [Contributing](.github/CONTRIBUTING.md) · [Security](.github/SECURITY.md) · [Asset credits](docs/media/README.md)
 
 </details>
 
 [Apache-2.0](LICENSE)
 
-[Report a bug](https://github.com/luxiaoyu0731/genesis-hive/issues/new?template=bug_report.yml) · [First-use feedback](https://github.com/luxiaoyu0731/genesis-hive/issues/new?template=first_use.yml) · [Starter tasks](CONTRIBUTING.md)
+[Report a bug](https://github.com/luxiaoyu0731/genesis-hive/issues/new?template=bug_report.yml) · [First-use feedback](https://github.com/luxiaoyu0731/genesis-hive/issues/new?template=first_use.yml) · [Starter tasks](.github/CONTRIBUTING.md)
 
 [Versioned releases and artifact verification](docs/releasing.md)

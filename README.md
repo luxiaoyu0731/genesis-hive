@@ -73,17 +73,17 @@ npm run dev
 ```sh
 python3 -B -m unittest discover -s tests -v
 # 完整开发环境中运行离线执行器模拟
-.venv/bin/python test_executor_mock.py
+.venv/bin/python scripts/experiments/test_executor_mock.py
 ```
 
 目前为单进程本地原型，状态保存在内存，无公网认证；工具适配仍有骨架实现，预算并非严格 HTTP 计费上限。异构角色不等于已证明准确率提升。详见 [代码审查](docs/code-review.md)。
 
-[贡献指南](CONTRIBUTING.md) · [安全反馈](SECURITY.md)
+[贡献指南](.github/CONTRIBUTING.md) · [安全反馈](.github/SECURITY.md)
 
 </details>
 
 [Apache-2.0](LICENSE) · [素材说明](docs/media/README.md)
 
-[遇到问题](https://github.com/luxiaoyu0731/genesis-hive/issues/new?template=bug_report.yml) · [告诉我们哪一步不清楚](https://github.com/luxiaoyu0731/genesis-hive/issues/new?template=first_use.yml) · [从小任务参与](CONTRIBUTING.md)
+[遇到问题](https://github.com/luxiaoyu0731/genesis-hive/issues/new?template=bug_report.yml) · [告诉我们哪一步不清楚](https://github.com/luxiaoyu0731/genesis-hive/issues/new?template=first_use.yml) · [从小任务参与](.github/CONTRIBUTING.md)
 
 [Versioned releases and artifact verification](docs/releasing.md)

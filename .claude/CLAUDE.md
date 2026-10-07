@@ -2,7 +2,7 @@
 
 ## 项目概述
 
-Genesis Hive 是一个自进化多Agent智能体系统。技术栈：Python + FastAPI + LangGraph（后端），React + TypeScript + D3.js（前端）。详细架构和开发步骤见 `SKILL.md`。
+Genesis Hive 是一个自进化多Agent智能体系统。技术栈：Python + FastAPI + LangGraph（后端），React + TypeScript + D3.js（前端）。详细架构和开发步骤见 `docs/development-design.md`。
 
 ## LLM 调用规范
 
@@ -63,8 +63,8 @@ Genesis Hive 是一个自进化多Agent智能体系统。技术栈：Python + Fa
 
 ## 开发规范
 
-- 每完成一个 Step（L1-L5 引擎），跑一遍 SKILL.md 中"开发阶段自检流程"的 6 项检查
-- 遇到 SKILL.md 中"已知风险登记簿"记载的问题时，按已有修复方案处理
+- 每完成一个 Step（L1-L5 引擎），跑一遍 docs/development-design.md 中"开发阶段自检流程"的 6 项检查
+- 遇到 docs/development-design.md 中"已知风险登记簿"记载的问题时，按已有修复方案处理
 - 发现新的潜在风险时，记录到"待观察的潜在风险"表格中，并告知我
 - LangGraph 相关：使用 Command API 做动态路由，轮次间重编译实现团队重组，不要尝试运行时添加节点
 - 共识检测：使用裁判 LLM 方案，不要使用 cosine similarity

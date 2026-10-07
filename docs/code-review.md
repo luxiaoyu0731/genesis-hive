@@ -35,7 +35,7 @@ JSON 契约离线 unittest：2 tests，OK；全部 Python 文件语法检查通�
 
 经操作员批准执行兼容范围升级，前端锁文件重新解析，Vite 升级至 8.3.3。npm 官方 registry 审计从 5 项高危降至 0 项；`npm run build` 和 `tsc --noEmit` 均通过。前端包声明 ESM 与 Apache-2.0，并提供 typecheck 脚本。
 
-`test_executor_mock.py` 在使用无效示例接口地址和占位密钥的隔离环境下执行，验证并发、依赖先后和增量复用通过；未调用收费模型，模拟耗时不能写成真实模型效率指标。JSON 输出回归测试通过。
+`scripts/experiments/test_executor_mock.py` 在使用无效示例接口地址和占位密钥的隔离环境下执行，验证并发、依赖先后和增量复用通过；未调用收费模型，模拟耗时不能写成真实模型效率指标。JSON 输出回归测试通过。
 
 上述依赖告警已解决，公网服务发布仍受未修复的认证与任务生命周期问题阻挡，不宣称整系统安全验收完成。
 

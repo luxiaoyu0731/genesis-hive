@@ -1,5 +1,10 @@
 """Executor 端到端测试：Decomposer → Spawner → Executor（真实 LLM）"""
 
+
+from pathlib import Path
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
 import asyncio
 import json
 

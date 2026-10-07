@@ -59,4 +59,4 @@ npm run typecheck
 npm run build
 ```
 
-`test_executor_mock.py` 用模拟执行验证任务依赖和结果复用；其他实验脚本可能调用真实模型。工具适配、并发占位和预算的剩余问题见 [代码审查](code-review.md)。
+`scripts/experiments/test_executor_mock.py` 用模拟执行验证任务依赖和结果复用；其他实验脚本可能调用真实模型。工具适配、并发占位和预算的剩余问题见 [代码审查](code-review.md)。
