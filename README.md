@@ -24,6 +24,8 @@ flowchart LR
 
 ## 本地运行
 
+建议使用 Python 3.11+；前端需要 Node.js 22.12+，与 `frontend/package.json` 的要求一致。
+
 ```sh
 git clone https://github.com/luxiaoyu0731/genesis-hive.git
 cd genesis-hive
