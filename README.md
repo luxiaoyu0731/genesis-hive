@@ -2,7 +2,7 @@
 
 [English](README.en.md)
 
-从一个目标生成 Agent 团队，通过并行分析、圆桌质证与团队调整汇总结果。
+给探索多 Agent 协作的开发者：把一个目标拆成角色与任务，通过并行分析、圆桌质证和团队调整形成汇总报告。
 
 ![多角色协作概念插画](docs/media/project-hero.png)
 
@@ -83,3 +83,5 @@ python3 -B -m unittest discover -s tests -v
 </details>
 
 [Apache-2.0](LICENSE) · [素材说明](docs/media/README.md)
+
+[遇到问题](https://github.com/luxiaoyu0731/genesis-hive/issues/new?template=bug_report.yml) · [告诉我们哪一步不清楚](https://github.com/luxiaoyu0731/genesis-hive/issues/new?template=first_use.yml) · [从小任务参与](CONTRIBUTING.md)
